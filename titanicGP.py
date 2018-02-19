@@ -90,7 +90,7 @@ toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max
 '''
 
 def main():
-    gen = range(50)
+    gen = range(1000)
     avg_list = []
     max_list = []
     min_list = []
@@ -105,7 +105,7 @@ def main():
 
     # Begin the evolution
     for g in gen:
-        print("-- Generation %i --" % g)
+        # print("-- Generation %i --" % g)
 
         # Select the next generation individuals
         offspring = toolbox.select(pop, len(pop))
@@ -148,15 +148,15 @@ def main():
         max_list.append(g_max)
         min_list.append(g_min)
 
-        print("  Min %s" % g_min)
-        print("  Max %s" % g_max)
-        print("  Avg %s" % mean)
-        print("  Std %s" % std)
+        # print("  Min %s" % g_min)
+        # print("  Max %s" % g_max)
+        # print("  Avg %s" % mean)
+        # print("  Std %s" % std)
 
-    print("-- End of (successful) evolution --")
+    # print("-- End of (successful) evolution --")
 
     best_ind = tools.selBest(pop, 1)[0]
-    print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
+    # print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
 
     plt.plot(gen, avg_list, label="average")
     plt.plot(gen, min_list, label="minimum")
