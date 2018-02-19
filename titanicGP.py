@@ -15,7 +15,7 @@ import operator
 def preprocessData():
     #Importing the dataset
     dataset = pd.read_csv('train.csv')
-    X = dataset[['Pclass','Age', 'Sex','SibSp','Parch','Fare', ]].values
+    X = dataset[['Pclass','Age', 'Sex','SibSp','Parch','Fare']].values
     Y = dataset.iloc[:, 1].values
 
     #Dealing with encoding the labels
@@ -66,7 +66,7 @@ inputs, outputs = preprocessData()
 
 def evaluateInd(individual, pset):
     func = gp.compile(expr=individual, pset=pset)
-    return sum((func(*in_>0)) == out for in_, out in zip(inputs, outputs)),
+    return sum((func(*in_)>0) == out for in_, out in zip(inputs, outputs)),
 
 toolbox.register("evaluate", evaluateInd, pset = pset)
 
@@ -90,7 +90,7 @@ toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max
 '''
 
 def main():
-    gen = range(10)
+    gen = range(50)
     avg_list = []
     max_list = []
     min_list = []

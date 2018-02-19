@@ -64,7 +64,6 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("compile", gp.compile, pset=pset)
 
 inputs, outputs = preprocessData()
-#X, Y= [[1,2],[0,2],[3,2]], [0,1,2]
 
 def evaluateInd(individual, pset):
     func = gp.compile(expr=individual, pset=pset)
@@ -75,7 +74,7 @@ def evaluateInd(individual, pset):
     #print([out for out in outputs])
     #result = np.array([func(*in_>0) for in_ in inputs]) & np.array([out for out in outputs])
     #return np.sum(result)
-    return sum((func(*in_>0)) == out for in_, out in zip(inputs, outputs)),
+    return sum((func(*in_)>0) == out for in_, out in zip(inputs, outputs)),
     '''
     for i in range(len(X)):
         #sqerrors += ((func([1,2]) - Y[i]))**2
@@ -108,7 +107,7 @@ toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max
 '''
 
 def main():
-    gen = range(10)
+    gen = range(50)
     avg_list = []
     max_list = []
     min_list = []
@@ -118,7 +117,6 @@ def main():
     # Evaluate the entire population
     fitnesses = list(map(toolbox.evaluate, pop))
     for ind, fit in zip(pop, fitnesses):
-        
         ind.fitness.values = fit
     
     # Begin the evolution
