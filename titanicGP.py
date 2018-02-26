@@ -15,14 +15,24 @@ import operator
 
 def preprocessData():
     #Importing the dataset
-    dataset = pd.read_csv('train.csv')
-    X = dataset[['Pclass','Age', 'Sex','SibSp','Parch','Fare']].values
-    Y = dataset.iloc[:, 1].values
+    dataset = pd.read_csv('standarizedTrain.csv')
+    dataset['Embarked'] = dataset['Embarked'].fillna("Dink")
+    dataset['Cabin'] = dataset['Cabin'].apply(lambda x: x[0] if not pd.isnull(x) else x)
+    dataset['Cabin'] = dataset['Cabin'].fillna("Dinkam")
+
+    X = dataset[['Pclass','Age', 'Sex','SibSp','Parch','Fare','Embarked','Cabin']].values
+    Y = dataset.iloc[:, 2].values
 
     #Dealing with encoding the labels
     from sklearn.preprocessing import LabelEncoder
     labelencoder_X = LabelEncoder()
     X[:,2] = labelencoder_X.fit_transform(X[:,2])
+    labelencoder_6 = LabelEncoder()
+    labelencoder_6.fit(X[:,6])
+    X[:,6] = labelencoder_6.transform(X[:,6])
+    labelencoder_7 = LabelEncoder()
+    labelencoder_7.fit(X[:,7])
+    X[:,7] = labelencoder_7.transform(X[:,7])
 
     #Dealing with missing datas
     from sklearn.preprocessing import Imputer
@@ -31,10 +41,27 @@ def preprocessData():
                     strategy='mean', axis=0)
     imputer=imputer.fit(X[:,1:2])
     X[:,1:2]=imputer.transform(X[:,1:2])
+
+    #Cleans back to Nones
+    encodedDink = labelencoder_6.transform(["Dink"])
+    for a in X[:,6]:
+        if a == encodedDink[0]:
+            a = None
+
+    encodedDink = labelencoder_7.transform(["Dinkam"])
+    for a in X[:,7]:
+        if a == encodedDink[0]:
+            a = None
+    print(X)
     return X, Y
 
 #Number of attributes
-ATTRIBUTE_NUM = 6
+ATTRIBUTE_NUM = 8
+
+
+#Check if data is NaN
+def nan(a):
+    return int(np.isnan(a));
 
 #Creating the individuals
 #lists of floats with a minimizing objectives fitness
@@ -50,7 +77,7 @@ pset.addPrimitive(np.negative, arity=1)
 #Addional primitives? ========================================================
 pset.addPrimitive(np.absolute, arity=1)
 pset.addPrimitive(np.log, arity=1)
-pset.addPrimitive(np.isnan, arity=1)
+pset.addPrimitive(nan, arity=1) #checks if NaN
 pset.renameArguments(ARG0='x')
 pset.renameArguments(ARG1='y')
 pset.addTerminal(0)
@@ -95,31 +122,33 @@ toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max
 '''
 
 def main():
-    gen = range(100)
+    gen = range(75)
     avg_list = []
     max_list = []
     min_list = []
 
-    pop = toolbox.population(n=100)
+    pop = toolbox.population(n=75)
 
 
-    for ind in zip(pop):
+    for ind in pop:
         try:
             ind.fitness.values = list(map(toolbox.evaluate, ind))
         except:
             ind.fitness.values = (np.inf,np.inf)
 
-"""
-    try:
+
+
+
+#    try:
         # Evaluate the entire population
-        fitnesses = list(map(toolbox.evaluate, pop))
-    except:
-        fitnes
+ #       fitnesses = list(map(toolbox.evaluate, pop))
+  #  except:
+   #     fitnes
 
-    for ind, fit in zip(pop, fitnesses):
-        ind.fitness.values = fit
+    #for ind, fit in zip(pop, fitnesses):
+     #   ind.fitness.values = fit
 
-"""
+
 
     # Begin the evolution
     for g in gen:
