@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import random
 from deap import creator, tools, base, gp
+from sklearn.metrics import confusion_matrix
 import operator
 
 def preprocessData():
@@ -37,7 +38,7 @@ ATTRIBUTE_NUM = 6
 
 #Creating the individuals
 #lists of floats with a minimizing objectives fitness
-creator.create("FitnessMin", base.Fitness, weights = (1.0,))
+creator.create("FitnessMin", base.Fitness, weights = (-1.0,-1.0))
 creator.create("Individual", gp.PrimitiveTree, fitness = creator.FitnessMin)
 
 #initialize a primitive set and add all the primitives our trees can use
@@ -66,7 +67,10 @@ inputs, outputs = preprocessData()
 
 def evaluateInd(individual, pset):
     func = gp.compile(expr=individual, pset=pset)
-    return sum((func(*in_)>0) == out for in_, out in zip(inputs, outputs)),
+    predictions = [(func(*in_)>0) for in_ in inputs]
+    tn, fp, fn, tp = confusion_matrix(predictions, outputs).ravel()
+    return fp,fn
+
 
 toolbox.register("evaluate", evaluateInd, pset = pset)
 
@@ -90,12 +94,12 @@ toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max
 '''
 
 def main():
-    gen = range(1000)
+    gen = range(100)
     avg_list = []
     max_list = []
     min_list = []
 
-    pop = toolbox.population(n=10)
+    pop = toolbox.population(n=100)
 
     # Evaluate the entire population
     fitnesses = list(map(toolbox.evaluate, pop))
@@ -105,7 +109,7 @@ def main():
 
     # Begin the evolution
     for g in gen:
-        # print("-- Generation %i --" % g)
+        print("-- Generation %i --" % g)
 
         # Select the next generation individuals
         offspring = toolbox.select(pop, len(pop))
@@ -148,15 +152,15 @@ def main():
         max_list.append(g_max)
         min_list.append(g_min)
 
-        # print("  Min %s" % g_min)
-        # print("  Max %s" % g_max)
-        # print("  Avg %s" % mean)
-        # print("  Std %s" % std)
+        print("  Min %s" % g_min)
+        print("  Max %s" % g_max)
+        print("  Avg %s" % mean)
+        print("  Std %s" % std)
 
-    # print("-- End of (successful) evolution --")
+    print("-- End of (successful) evolution --")
 
     best_ind = tools.selBest(pop, 1)[0]
-    # print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
+    print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
 
     plt.plot(gen, avg_list, label="average")
     plt.plot(gen, min_list, label="minimum")
