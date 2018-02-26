@@ -50,6 +50,7 @@ pset.addPrimitive(np.negative, arity=1)
 #Addional primitives? ========================================================
 pset.addPrimitive(np.absolute, arity=1)
 pset.addPrimitive(np.log, arity=1)
+pset.addPrimitive(np.isnan, arity=1)
 pset.renameArguments(ARG0='x')
 pset.renameArguments(ARG1='y')
 pset.addTerminal(0)
@@ -101,11 +102,24 @@ def main():
 
     pop = toolbox.population(n=100)
 
-    # Evaluate the entire population
-    fitnesses = list(map(toolbox.evaluate, pop))
-    for ind, fit in zip(pop, fitnesses):
 
+    for ind in zip(pop):
+        try:
+            ind.fitness.values = list(map(toolbox.evaluate, ind))
+        except:
+            ind.fitness.values = (np.inf,np.inf)
+
+"""
+    try:
+        # Evaluate the entire population
+        fitnesses = list(map(toolbox.evaluate, pop))
+    except:
+        fitnes
+
+    for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
+
+"""
 
     # Begin the evolution
     for g in gen:
